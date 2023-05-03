@@ -1,0 +1,30 @@
+{
+    "name": "@rbxts/behavior-tree-3",
+    "version": "2.0.1-ts.3",
+    "description": "Defaultio's BehaviorTree3 with types!",
+    "main": "init.lua",
+    "types": "index.d.ts",
+    "scripts": {},
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/TheNickmaster21/BehaviorTree3TS.git"
+    },
+    "keywords": [
+        "roblox",
+        "behavior tree",
+        "behavior tree 3"
+    ],
+    "homepage": "https://github.com/TheNickmaster21/BehaviorTree3TS.git#readme",
+    "publishConfig": {
+        "access": "public"
+    },
+    "devDependencies": {
+        "@rbxts/types": "^1.0.557"
+    },
+    "files": [
+        "init.lua",
+        "index.d.ts",
+        "BehaviorTree3.lua",
+        "BehaviorTreeCreator.lua"
+    ]
+}
