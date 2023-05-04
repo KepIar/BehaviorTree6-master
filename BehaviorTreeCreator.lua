@@ -125,9 +125,12 @@ function TreeCreator:_getExternalSourceTask(treeName, folder)
 	if SourcePeram then
 		if SourcePeram:IsA("StringValue") then
 			local tasks = GetExternalTasksOfTree(treeName)
-			local module = tasks:FindFirstChild(SourcePeram.Value)
+			local moduleName = SourcePeram.Value
+			local module = tasks:FindFirstChild(moduleName)
 			if module then
 				return GetModule(module)
+			else
+				warn(string.format("Could not find task module: '%s'", moduleName))
 			end
 		else
 			error("Make sure you are using the forked version of BTrees by kin!")
