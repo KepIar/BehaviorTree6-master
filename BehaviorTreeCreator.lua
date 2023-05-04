@@ -89,26 +89,7 @@ end
 function TreeCreator:_getExternalSourceTask(folder)
 	local SourcePeram = folder.Parameters:FindFirstChild("Source")
 	if SourcePeram then
-		local SourceName = SourcePeram.Value
-
-		local service = game:GetService("ServerScriptService")
-		local server = service:FindFirstChild("Server")
-		if not server then
-			warn("'Server' ServerScript not found. Building it.")
-			server = Instance.new("Script")
-			server.Name = "Server"
-			server.Parent = service
-		end
-
-		local externalTasks = server:FindFirstChild("btree-external-tasks")
-		if not externalTasks then
-			warn("'ExternalTasks' Folder not found. Building it.")
-			externalTasks = Instance.new("Folder")
-			externalTasks.Name = "btree-external-tasks"
-			externalTasks.Parent = server
-		end
-
-		local Source = externalTasks:FindFirstChild(SourcePeram.Value, true)
+		local Source = SourcePeram.Value
 		if Source then
 			return GetModule(Source)
 		end
