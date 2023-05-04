@@ -16,6 +16,7 @@
 	- Changed up some various internal stuff
 --]]
 
+local ServerScriptService = game:GetService("ServerScriptService")
 local CollectionService = game:GetService("CollectionService")
 local TREE_TAG = "_BTree"
 
@@ -50,6 +51,39 @@ end
 
 ---------------------------------------------
 -------------- PRIVATE METHODS --------------
+
+local function GetExternalTasksDirectory()
+	local server = ServerScriptService:FindFirstChild("Server")
+	if server then
+		local folder = server:FindFirstChild("btree-external-tasks")
+		if folder then
+			return folder
+		else
+			error("Ensure the directory game.ServerScriptService.Server['btree-external-tasks'] exists!")
+		end
+	else
+		error("Ensure the directory game.ServerScriptService.Server exists!")
+	end
+end
+
+local function HasMultipleTreesWithSameName(folder, treeName)
+	local count = 0
+	for _, v in pairs(folder:GetChildren()) do
+		if v.Name == treeName then
+			count += 1
+		end
+	end
+	return count > 1
+end
+
+local function GetExternalTasksOfTree(treeName)
+	local externalTasksOfTree = GetExternalTasksDirectory():FindFirstChild(treeName)
+	if externalTasksOfTree then
+		return externalTasksOfTree
+	else
+		error(string.format("Ensure the directory game.ServerScriptService.Server['btree-external-tasks']['%s'] exists!", treeName))
+	end
+end
 
 local function GetModule(ModuleScript)
 	local found = SourceTasks[ModuleScript]
@@ -86,18 +120,23 @@ function TreeCreator:_getSourceTask(folder)
 		return GetModule(ModuleScript)
 	end
 end
-function TreeCreator:_getExternalSourceTask(folder)
+function TreeCreator:_getExternalSourceTask(treeName, folder)
 	local SourcePeram = folder.Parameters:FindFirstChild("Source")
 	if SourcePeram then
-		local Source = SourcePeram.Value
-		if Source then
-			return GetModule(Source)
+		if SourcePeram:IsA("StringValue") then
+			local tasks = GetExternalTasksOfTree(treeName)
+			local module = tasks:FindFirstChild(SourcePeram.Value)
+			if module then
+				return GetModule(module)
+			end
+		else
+			error("Make sure you are using the forked version of BTrees by kin!")
 		end
 	end
 end
 
 
-function TreeCreator:_buildNode(folder)
+function TreeCreator:_buildNode(treeName, folder)
 	local nodeType = folder.Type.Value
 	local weight = folder:FindFirstChild("Weight") and folder.Weight.Value or 1
 
@@ -112,7 +151,7 @@ function TreeCreator:_buildNode(folder)
 		return tonumber(a.Name) < tonumber(b.Name)
 	end)
 	for i = 1,#orderedChildren do
-		orderedChildren[i] = self:_buildNode(orderedChildren[i].Value)
+		orderedChildren[i] = self:_buildNode(treeName, orderedChildren[i].Value)
 	end
 
 	-- Get parameters from parameters folder
@@ -133,7 +172,7 @@ function TreeCreator:_buildNode(folder)
 		parameters.run = sourcetask.run
 		parameters.finish = sourcetask.finish
 	elseif nodeType == "External Task" then
-		local sourcetask = self:_getExternalSourceTask(folder)
+		local sourcetask = self:_getExternalSourceTask(treeName, folder)
 		assert(sourcetask, "could't build tree; external task node had no source")
 		parameters.start = sourcetask.start
 		parameters.run = sourcetask.run
@@ -151,19 +190,22 @@ function TreeCreator:_buildNode(folder)
 	return node
 end
 
-
 function TreeCreator:_createTree(treeFolder)
 	print("Attempt create tree: ",treeFolder)
+
+	local treeName = treeFolder.Name
 	local nodes = treeFolder.Nodes
 	local RootFolder = nodes:FindFirstChild("Root")
-	assert(RootFolder, string.format("Could not find Root under BehaviorTrees.Trees.%s.Nodes!",treeFolder.Name))
-	assert(#RootFolder.Outputs:GetChildren() == 1, string.format("The root node does not have exactly one connection for %s!",treeFolder.Name))
+
+	assert(RootFolder, string.format("Could not find Root under BehaviorTrees.Trees.%s.Nodes!",treeName))
+	assert(#RootFolder.Outputs:GetChildren() == 1, string.format("The root node does not have exactly one connection for %s!",treeName))
+	assert(not HasMultipleTreesWithSameName(GetExternalTasksDirectory(), treeName), string.format("Multiple trees with the name '%s' exist under ServerScriptService.server['btree-external-tasks']!", treeName))
 
 	local firstNodeFolder = RootFolder.Outputs:GetChildren()[1].Value
-	local root = self:_buildNode(firstNodeFolder)
+	local root = self:_buildNode(treeName, firstNodeFolder)
 	local Tree = BehaviorTree3.new({tree=root,treeFolder = treeFolder})
 	Trees[treeFolder] = Tree
-	TreeIDs[treeFolder.Name] = Tree
+	TreeIDs[treeName] = Tree
 	return Tree	
 end
 
