@@ -177,9 +177,13 @@ function TreeCreator:_buildNode(treeName, folder)
 	elseif nodeType == "External Task" then
 		local sourcetask = self:_getExternalSourceTask(treeName, folder)
 		assert(sourcetask, "could't build tree; external task node had no source")
-		parameters.start = sourcetask.start
-		parameters.run = sourcetask.run
-		parameters.finish = sourcetask.finish
+
+		-- as the npm package i am using in my workflow already builds as a node i have to access the specific methods of the node
+		-- in order to build it again. it's not good because i'm building it twice but it's a bandaid fix to interoperability 
+		-- interopability = [for two systems to work together. inter = with each other, operability = the ability to operate]
+		parameters.start = sourcetask.params.start
+		parameters.run = sourcetask.params.run
+		parameters.finish = sourcetask.params.finish
 	elseif nodeType == "Tree" then
 		local tree = self:_getTreeFromId(parameters.treeid)
 		assert(tree, string.format("could't build tree; couldn't get tree object for tree node with TreeID:  %s!",tostring(parameters.treeid)))
@@ -209,7 +213,7 @@ function TreeCreator:_createTree(treeFolder)
 	local Tree = BehaviorTree3.new({tree=root,treeFolder = treeFolder})
 	Trees[treeFolder] = Tree
 	TreeIDs[treeName] = Tree
-	return Tree	
+	return Tree
 end
 
 
