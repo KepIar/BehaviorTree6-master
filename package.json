@@ -1,6 +1,6 @@
 {
     "name": "@grifon-games/behavior-tree-5",
-    "version": "2.0.1-ts.51",
+    "version": "2.0.1-ts.52",
     "description": "Defaultio's BehaviorTree3 with types!",
     "main": "init.lua",
     "types": "index.d.ts",
