@@ -202,7 +202,7 @@ function TreeCreator:_createTree(treeFolder)
 
 	assert(RootFolder, string.format("Could not find Root under BehaviorTrees.Trees.%s.Nodes!",treeName))
 	assert(#RootFolder.Outputs:GetChildren() == 1, string.format("The root node does not have exactly one connection for %s!",treeName))
-	assert(not HasMultipleTreesWithSameName(GetExternalTasksDirectory(), treeName), string.format("Multiple trees with the name '%s' exist under ServerScriptService.server['btree-external-tasks']!", treeName))
+	assert(not HasMultipleTreesWithSameName(GetExternalTasksDirectory(), treeName), string.format("Multiple trees with the name '%s' exist under ServerScriptService.Server['btree-external-tasks']!", treeName))
 
 	local firstNodeFolder = RootFolder.Outputs:GetChildren()[1].Value
 	local root = self:_buildNode(treeName, firstNodeFolder)
